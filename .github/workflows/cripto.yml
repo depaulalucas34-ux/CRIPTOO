@@ -1,0 +1,43 @@
+name: Cripto alertas
+
+on:
+  schedule:
+    - cron: "*/30 * * * *"   # cada 30 minutos
+  workflow_dispatch:          # permite ejecutarlo a mano para probar
+
+permissions:
+  contents: write
+
+concurrency:
+  group: cripto
+
+jobs:
+  avisar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - run: pip install requests
+
+      - name: Revisar precios y avisar
+        run: python cripto_alertas.py
+        env:
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+          # ---- Edita estos valores a tu gusto ----
+          MONEDAS: "BTC, ETH, XRP, SOL"
+          MONEDA: "usd"                 # usd, eur o ars
+          UMBRAL: "5"                   # avisa si una moneda sube o baja 5% o más en 24 h
+          HORA_RESUMEN: "9"             # resumen diario a partir de esta hora (0-23). Usa -1 para desactivarlo
+          ZONA: "America/Argentina/Buenos_Aires"
+          ENFRIAMIENTO_HORAS: "12"      # no repite la misma alerta antes de estas horas
+
+      - name: Guardar estado
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@users.noreply.github.com"
+          git add estado.json
+          git diff --cached --quiet || (git commit -m "Actualizar estado" && git push)
