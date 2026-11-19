@@ -31,7 +31,7 @@ jobs:
           MONEDAS: "BTC, ETH, XRP, SOL"
           MONEDA: "usd"                 # usd, eur o ars
           UMBRAL: "5"                   # avisa si una moneda sube o baja 5% o más en 24 h
-          HORA_RESUMEN: "9"             # resumen diario a partir de esta hora (0-23). Usa -1 para desactivarlo
+          HORA_RESUMEN: "5"             # resumen diario a partir de esta hora (0-23). Usa -1 para desactivarlo
           ZONA: "America/Argentina/Buenos_Aires"
           ENFRIAMIENTO_HORAS: "12"      # no repite la misma alerta antes de estas horas
 
