@@ -25,7 +25,8 @@ def env(nombre, defecto):
 
 def config():
     return {
-        "topic": env("NTFY_TOPIC", ""),
+        "topic": env("NTFY_TOPIC", "").strip(),
+        "forzar": bool(os.environ.get("FORZAR", "").strip()),
         "monedas": env("MONEDAS", "BTC, ETH, XRP, SOL"),
         "moneda": env("MONEDA", "usd").lower(),
         "umbral": float(env("UMBRAL", "5")),
@@ -73,6 +74,7 @@ def enviar(topic, titulo, mensaje, prioridad=3, tags=("chart_with_upwards_trend"
     r = requests.post("https://ntfy.sh/", json={"topic": topic, "title": titulo, "message": mensaje,
                                                 "priority": prioridad, "tags": list(tags)}, timeout=20)
     r.raise_for_status()
+    print(f"ntfy respondió {r.status_code} para el tema de {len(topic)} caracteres")
 
 
 def cargar_estado():
@@ -141,10 +143,15 @@ def main():
         print("Alerta enviada:", [r["symbol"] for r in alertas])
 
     hoy = ahora.date().isoformat()
-    if 0 <= c["hora_resumen"] <= 23 and ahora.hour >= c["hora_resumen"] and estado["ultimo_resumen"] != hoy:
+    toca_resumen = (0 <= c["hora_resumen"] <= 23 and ahora.hour >= c["hora_resumen"]
+                    and estado["ultimo_resumen"] != hoy)
+    if c["forzar"] or toca_resumen:
         enviar(c["topic"], f"Cripto Diario - {ahora:%d/%m}", "\n".join(linea(r, sim) for r in rows))
-        estado["ultimo_resumen"] = hoy
-        print("Resumen diario enviado")
+        if not c["forzar"]:
+            estado["ultimo_resumen"] = hoy
+        print("Resumen enviado" + (" (prueba manual)" if c["forzar"] else ""))
+    else:
+        print(f"Nada que enviar: sin alertas y el resumen de hoy {'ya se mandó' if estado['ultimo_resumen'] == hoy else 'aún no es la hora'}.")
 
     guardar_estado(estado)
     print("Listo.", ahora.isoformat(timespec="minutes"))
