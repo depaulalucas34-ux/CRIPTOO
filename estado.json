@@ -1,0 +1,21 @@
+{
+ "monedas": {
+  "bitcoin": {
+   "nivel": 0,
+   "ts": null
+  },
+  "ethereum": {
+   "nivel": 0,
+   "ts": null
+  },
+  "ripple": {
+   "nivel": 0,
+   "ts": null
+  },
+  "solana": {
+   "nivel": 0,
+   "ts": null
+  }
+ },
+ "ultimo_resumen": ""
+}
